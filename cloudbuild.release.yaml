@@ -13,4 +13,4 @@ steps:
 
 images:
 - gcr.io/$PROJECT_ID/tirev
-- gcr.io/$PROJECT_ID/tirev:$COMMIT_SHA
+- gcr.io/$PROJECT_ID/tirev:$TAG_NAME
