@@ -28,36 +28,38 @@ import (
 var config = configfile.NewEnvReader()
 
 var (
-	front             = config.Bool("front")
-	port              = config.IntDefault("port", 8080)
-	noHealthz         = config.Bool("no_healthz")
-	healthzPath       = config.StringDefault("healthz_path", "/healthz")
-	noProm            = config.Bool("no_prom")
-	promPort          = config.IntDefault("prom_port", 9187)
-	noGzip            = config.Bool("no_gzip")
-	noBr              = config.Bool("no_br")
-	noLog             = config.Bool("no_log")
-	noReqID           = config.Bool("no_reqid")
-	reqHeaderSet      = parseHeaders(config.String("reqheader_set"))
-	reqHeaderAdd      = parseHeaders(config.String("reqheader_add"))
-	reqHeaderDel      = parseHeaders(config.String("reqheader_del"))
-	respHeaderSet     = parseHeaders(config.String("respheader_set"))
-	respHeaderAdd     = parseHeaders(config.String("respheader_add"))
-	respHeaderDel     = parseHeaders(config.String("respheader_del"))
-	ratelimitS        = config.Int("ratelimit_s")
-	ratelimitM        = config.Int("ratelimit_m")
-	ratelimitH        = config.Int("ratelimit_h")
-	bodyBufferRequest = config.Bool("body_bufferrequest")
-	bodyLimitRequest  = config.Int64("body_limitrequest") // bytes
-	redirectHTTPS     = config.Bool("redirect_https")
-	hstsMode          = config.String("hsts")         // "", "preload", other = default
-	redirectWWW       = config.String("redirect_www") // "", "www", "non"
-	upstreamAddr      = config.String("upstream_addr")
-	upstreamProto     = config.String("upstream_proto") // http, h2c, https, unix
-	upstreamHeaderSet = parseHeaders(config.String("upstream_header_set"))
-	upstreamHeaderAdd = parseHeaders(config.String("upstream_header_add"))
-	upstreamHeaderDel = parseHeaders(config.String("upstream_header_del"))
-	gcpHLB            = config.IntDefault("gcp_hlb", -1)
+	front                = config.Bool("front")
+	port                 = config.IntDefault("port", 8080)
+	noHealthz            = config.Bool("no_healthz")
+	healthzPath          = config.StringDefault("healthz_path", "/healthz")
+	noProm               = config.Bool("no_prom")
+	promPort             = config.IntDefault("prom_port", 9187)
+	noGzip               = config.Bool("no_gzip")
+	noBr                 = config.Bool("no_br")
+	noLog                = config.Bool("no_log")
+	noReqID              = config.Bool("no_reqid")
+	reqHeaderSet         = parseHeaders(config.String("reqheader_set"))
+	reqHeaderAdd         = parseHeaders(config.String("reqheader_add"))
+	reqHeaderDel         = parseHeaders(config.String("reqheader_del"))
+	respHeaderSet        = parseHeaders(config.String("respheader_set"))
+	respHeaderAdd        = parseHeaders(config.String("respheader_add"))
+	respHeaderDel        = parseHeaders(config.String("respheader_del"))
+	ratelimitS           = config.Int("ratelimit_s")
+	ratelimitM           = config.Int("ratelimit_m")
+	ratelimitH           = config.Int("ratelimit_h")
+	bodyBufferRequest    = config.Bool("body_bufferrequest")
+	bodyLimitRequest     = config.Int64("body_limitrequest") // bytes
+	redirectHTTPS        = config.Bool("redirect_https")
+	hstsMode             = config.String("hsts")         // "", "preload", other = default
+	redirectWWW          = config.String("redirect_www") // "", "www", "non"
+	upstreamAddr         = config.String("upstream_addr")
+	upstreamProto        = config.String("upstream_proto") // http, h2c, https, unix
+	upstreamHeaderSet    = parseHeaders(config.String("upstream_header_set"))
+	upstreamHeaderAdd    = parseHeaders(config.String("upstream_header_add"))
+	upstreamHeaderDel    = parseHeaders(config.String("upstream_header_del"))
+	upstreamOverrideHost = config.String("upstream_override_host")
+	upstreamPath         = config.String("upstream_path") // prefix path
+	gcpHLB               = config.IntDefault("gcp_hlb", -1)
 )
 
 func main() {
@@ -208,7 +210,10 @@ func main() {
 		fmt.Println("Using Unix Transport")
 	}
 
-	s.Use(upstream.SingleHost(upstreamAddr, tr))
+	us := upstream.SingleHost(upstreamAddr, tr)
+	us.Host = upstreamOverrideHost
+	us.Path = upstreamPath
+	s.Use(us)
 	fmt.Println("Upstream", upstreamAddr)
 
 	if !noProm {
