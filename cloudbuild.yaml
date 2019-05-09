@@ -1,11 +1,11 @@
 steps:
-- name: gcr.io/moonrhythm-containers/golang:1.12.4-alpine3.9
+- name: gcr.io/moonrhythm-containers/golang:1.12.5-alpine3.9
   args: [go, build, -o, tirev, -ldflags, -w -s, -tags=cbrotli, main.go]
   env:
   - GOOS=linux
   - GOARCH=amd64
   - CGO_ENABLED=1
-  - GOPROXY=https://gomodprox.com
+  - GOPROXY=https://proxy.golang.org
 - name: gcr.io/cloud-builders/docker
   args: [build, -t, gcr.io/$PROJECT_ID/tirev:master, '.']
 - name: gcr.io/cloud-builders/docker
