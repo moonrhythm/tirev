@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,7 @@ import (
 	"github.com/moonrhythm/parapet/pkg/requestid"
 	"github.com/moonrhythm/parapet/pkg/upstream"
 	"github.com/moonrhythm/parapet/pkg/upstream/transport"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var config = configfile.NewEnvReader()
@@ -60,6 +62,10 @@ var (
 	upstreamOverrideHost = config.String("upstream_override_host")
 	upstreamPath         = config.String("upstream_path") // prefix path
 	gcpHLB               = config.IntDefault("gcp_hlb", -1)
+	tlsKey               = config.String("tls_key")  // tls key file path
+	tlsCert              = config.String("tls_cert") // tls cert file path
+	autocertDir          = config.String("autocert_dir")
+	autocertHosts        = config.String("autocert_hosts") // comma split hosts
 )
 
 func main() {
@@ -73,6 +79,28 @@ func main() {
 	} else {
 		s = parapet.New()
 		fmt.Println("Parapet Server")
+	}
+
+	if autocertDir != "" && autocertHosts != "" {
+		hosts := strings.Split(autocertHosts, ",")
+
+		m := &autocert.Manager{
+			Cache:      autocert.DirCache(autocertDir),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(hosts...),
+		}
+		s.TLSConfig = m.TLSConfig()
+	}
+
+	if tlsKey != "" && tlsCert != "" {
+		cert, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if s.TLSConfig == nil {
+			s.TLSConfig = &tls.Config{}
+		}
+		s.TLSConfig.Certificates = append(s.TLSConfig.Certificates, cert)
 	}
 
 	if !noHealthz {
