@@ -14,9 +14,7 @@ import (
 	"github.com/moonrhythm/parapet/pkg/gcp"
 	"github.com/moonrhythm/parapet/pkg/headers"
 	"github.com/moonrhythm/parapet/pkg/healthz"
-	"github.com/moonrhythm/parapet/pkg/host"
 	"github.com/moonrhythm/parapet/pkg/hsts"
-	"github.com/moonrhythm/parapet/pkg/location"
 	"github.com/moonrhythm/parapet/pkg/logger"
 	"github.com/moonrhythm/parapet/pkg/prom"
 	"github.com/moonrhythm/parapet/pkg/ratelimit"
@@ -104,11 +102,11 @@ func main() {
 	}
 
 	if !noHealthz {
-		h := host.NewCIDR("0.0.0.0/0")
-		l := location.Exact(healthzPath)
-		l.Use(healthz.New())
-		h.Use(l)
-
+		h := &healthz.Healthz{
+			Path: healthzPath,
+		}
+		h.Set(true)
+		h.SetReady(true)
 		s.Use(h)
 		fmt.Println("Registered healthz at", healthzPath)
 	}
