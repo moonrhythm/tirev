@@ -1,5 +1,5 @@
 steps:
-- name: gcr.io/moonrhythm-containers/golang:1.12.5-alpine3.9
+- name: gcr.io/moonrhythm-containers/golang:1.12.7-alpine3.10
   args: [go, build, -o, tirev, -ldflags, -w -s, -tags=cbrotli, main.go]
   env:
   - GOOS=linux
