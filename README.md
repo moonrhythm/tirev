@@ -12,7 +12,7 @@ Tiny Sidecar Reverse Proxy Powered by [Parapet](https://github.com/moonrhythm/pa
 #!/bin/bash
 NAME=https
 IMAGE=gcr.io/moonrhythm-containers/tirev
-TAG=v1.1.3
+TAG=v1.2.0
 ARGS=
 MOUNT_SOURCE=/data/https
 MOUNT_TARGET=/cert
@@ -66,7 +66,7 @@ spec:
         ports:
         - containerPort: 8080
       - name: tirev
-        image: gcr.io/moonrhythm-containers/tirev
+        image: gcr.io/moonrhythm-containers/tirev:v1.2.0
         env:
         - name: PORT
           value: "80"
