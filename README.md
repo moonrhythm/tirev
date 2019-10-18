@@ -6,6 +6,37 @@ Tiny Sidecar Reverse Proxy Powered by [Parapet](https://github.com/moonrhythm/pa
 
 ### Example
 
+#### Docker
+
+```sh
+#!/bin/bash
+NAME=https
+IMAGE=gcr.io/moonrhythm-containers/tirev
+TAG=v1.1.3
+ARGS=
+MOUNT_SOURCE=/data/https
+MOUNT_TARGET=/cert
+PORT_SOURCE=443
+PORT_TARGET=443
+
+docker pull $IMAGE:$TAG
+docker stop $NAME
+docker rm $NAME
+docker run -d --restart=always --name=$NAME \
+  -e FRONT=true \
+  -e PORT=443 \
+  -e NO_HEALTHZ=true \
+  -e NO_PROM=true \
+  -e NO_REQID=true \
+  -e UPSTREAM_ADDR=app:8080 \
+  -e UPSTREAM_PROTO=http \
+  -e TLS_KEY=/cert/tls.key \
+  -e TLS_CERT=/cert/tls.crt \
+  -e REDIRECT_WWW=non \
+  --link app:app \
+  -p $PORT_SOURCE:$PORT_TARGET -v $MOUNT_SOURCE:$MOUNT_TARGET $IMAGE:$TAG $ARGS
+```
+
 #### Kubernetes
 
 ```yaml
