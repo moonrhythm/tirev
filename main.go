@@ -60,8 +60,9 @@ var (
 	upstreamOverrideHost = config.String("upstream_override_host")
 	upstreamPath         = config.String("upstream_path") // prefix path
 	gcpHLB               = config.IntDefault("gcp_hlb", -1)
-	tlsKey               = config.String("tls_key")  // tls key file path
-	tlsCert              = config.String("tls_cert") // tls cert file path
+	tlsKey               = config.String("tls_key")         // tls key file path
+	tlsCert              = config.String("tls_cert")        // tls cert file path
+	tlsMinVersion        = config.String("tls_min_version") // tls1.0, tls1.1, tls1.2, tls1.3
 	autocertDir          = config.String("autocert_dir")
 	autocertHosts        = config.String("autocert_hosts") // comma split hosts
 )
@@ -249,6 +250,11 @@ func main() {
 		fmt.Println("Starting prometheus on port", promPort)
 	}
 
+	if s.TLSConfig != nil {
+		s.TLSConfig.MinVersion = parseTLSVersion(tlsMinVersion)
+		fmt.Println("TLS Min Version", tlsMinVersion)
+	}
+
 	s.Addr = fmt.Sprintf(":%d", port)
 	fmt.Println("Starting parapet on port", port)
 	fmt.Println()
@@ -277,4 +283,19 @@ func parseHeaders(s string) []string {
 	}
 
 	return rs
+}
+
+func parseTLSVersion(s string) uint16 {
+	switch s {
+	case "", "tls1.0":
+		return tls.VersionTLS10
+	case "tls1.1":
+		return tls.VersionTLS11
+	case "tls1.2":
+		return tls.VersionTLS12
+	case "tls1.3":
+		return tls.VersionTLS13
+	default:
+		panic("invalid TLS version")
+	}
 }
