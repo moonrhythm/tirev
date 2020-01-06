@@ -21,7 +21,6 @@ import (
 	"github.com/moonrhythm/parapet/pkg/redirect"
 	"github.com/moonrhythm/parapet/pkg/requestid"
 	"github.com/moonrhythm/parapet/pkg/upstream"
-	"github.com/moonrhythm/parapet/pkg/upstream/transport"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -50,9 +49,9 @@ var (
 	bodyBufferRequest    = config.Bool("body_bufferrequest")
 	bodyLimitRequest     = config.Int64("body_limitrequest") // bytes
 	redirectHTTPS        = config.Bool("redirect_https")
-	hstsMode             = config.String("hsts")         // "", "preload", other = default
-	redirectWWW          = config.String("redirect_www") // "", "www", "non"
-	upstreamAddr         = config.String("upstream_addr")
+	hstsMode             = config.String("hsts")           // "", "preload", other = default
+	redirectWWW          = config.String("redirect_www")   // "", "www", "non"
+	upstreamAddr         = config.String("upstream_addr")  // comma split addr
 	upstreamProto        = config.String("upstream_proto") // http, h2c, https, unix
 	upstreamHeaderSet    = parseHeaders(config.String("upstream_header_set"))
 	upstreamHeaderAdd    = parseHeaders(config.String("upstream_header_add"))
@@ -224,23 +223,32 @@ func main() {
 	var tr http.RoundTripper
 	switch upstreamProto {
 	default:
-		tr = &transport.HTTP{}
+		tr = &upstream.HTTPTransport{}
 		fmt.Println("Using HTTP Transport")
 	case "https":
-		tr = &transport.HTTPS{}
+		tr = &upstream.HTTPSTransport{}
 		fmt.Println("Using HTTPS Transport")
 	case "h2c":
-		tr = &transport.H2C{}
+		tr = &upstream.H2CTransport{}
 		fmt.Println("Using H2C Transport")
 	case "unix":
-		tr = &transport.Unix{}
+		tr = &upstream.UnixTransport{}
 		fmt.Println("Using Unix Transport")
 	}
 
-	us := upstream.SingleHost(upstreamAddr, tr)
+	var targets []*upstream.Target
+	for _, addr := range strings.Split(upstreamAddr, ",") {
+		targets = append(targets, &upstream.Target{
+			Host:      addr,
+			Transport: tr,
+		})
+	}
+
+	us := upstream.New(upstream.NewRoundRobinLoadBalancer(targets))
 	us.Host = upstreamOverrideHost
 	us.Path = upstreamPath
 	s.Use(us)
+
 	fmt.Println("Upstream", upstreamAddr)
 
 	if !noProm {
