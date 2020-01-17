@@ -58,6 +58,7 @@ var (
 	upstreamHeaderDel    = parseHeaders(config.String("upstream_header_del"))
 	upstreamOverrideHost = config.String("upstream_override_host")
 	upstreamPath         = config.String("upstream_path") // prefix path
+	upstreamMaxIdleConns = config.IntDefault("upstream_maxidleconns", 32)
 	gcpHLB               = config.IntDefault("gcp_hlb", -1)
 	tlsKey               = config.String("tls_key")         // tls key file path
 	tlsCert              = config.String("tls_cert")        // tls cert file path
@@ -223,16 +224,22 @@ func main() {
 	var tr http.RoundTripper
 	switch upstreamProto {
 	default:
-		tr = &upstream.HTTPTransport{}
+		tr = &upstream.HTTPTransport{
+			MaxIdleConns: upstreamMaxIdleConns,
+		}
 		fmt.Println("Using HTTP Transport")
 	case "https":
-		tr = &upstream.HTTPSTransport{}
+		tr = &upstream.HTTPSTransport{
+			MaxIdleConns: upstreamMaxIdleConns,
+		}
 		fmt.Println("Using HTTPS Transport")
 	case "h2c":
 		tr = &upstream.H2CTransport{}
 		fmt.Println("Using H2C Transport")
 	case "unix":
-		tr = &upstream.UnixTransport{}
+		tr = &upstream.UnixTransport{
+			MaxIdleConns: upstreamMaxIdleConns,
+		}
 		fmt.Println("Using Unix Transport")
 	}
 
