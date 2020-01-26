@@ -39,10 +39,10 @@ var (
 	noReqID              = config.Bool("no_reqid")
 	reqHeaderSet         = parseHeaders(config.String("reqheader_set"))
 	reqHeaderAdd         = parseHeaders(config.String("reqheader_add"))
-	reqHeaderDel         = parseHeaders(config.String("reqheader_del"))
+	reqHeaderDel         = parseStrings(config.String("reqheader_del"))
 	respHeaderSet        = parseHeaders(config.String("respheader_set"))
 	respHeaderAdd        = parseHeaders(config.String("respheader_add"))
-	respHeaderDel        = parseHeaders(config.String("respheader_del"))
+	respHeaderDel        = parseStrings(config.String("respheader_del"))
 	ratelimitS           = config.Int("ratelimit_s")
 	ratelimitM           = config.Int("ratelimit_m")
 	ratelimitH           = config.Int("ratelimit_h")
@@ -55,7 +55,7 @@ var (
 	upstreamProto        = config.String("upstream_proto") // http, h2c, https, unix
 	upstreamHeaderSet    = parseHeaders(config.String("upstream_header_set"))
 	upstreamHeaderAdd    = parseHeaders(config.String("upstream_header_add"))
-	upstreamHeaderDel    = parseHeaders(config.String("upstream_header_del"))
+	upstreamHeaderDel    = parseStrings(config.String("upstream_header_del"))
 	upstreamOverrideHost = config.String("upstream_override_host")
 	upstreamPath         = config.String("upstream_path") // prefix path
 	upstreamMaxIdleConns = config.IntDefault("upstream_maxidleconns", 32)
@@ -278,6 +278,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func parseStrings(s string) []string {
+	xs := strings.Split(s, ",")
+	for i := range xs {
+		xs[i] = strings.TrimSpace(xs[i])
+	}
+	return xs
 }
 
 func parseHeaders(s string) []string {
