@@ -1,6 +1,6 @@
 module github.com/acoshift/tirev
 
-go 1.13
+go 1.14
 
 require (
 	github.com/acoshift/configfile v1.6.0
