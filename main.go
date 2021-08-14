@@ -63,6 +63,7 @@ var (
 	tlsKey               = config.String("tls_key")         // tls key file path
 	tlsCert              = config.String("tls_cert")        // tls cert file path
 	tlsMinVersion        = config.String("tls_min_version") // tls1.0, tls1.1, tls1.2, tls1.3
+	tlsSelfSignedHosts   = config.String("tls_self_signed_hosts")
 	autocertDir          = config.String("autocert_dir")
 	autocertHosts        = config.String("autocert_hosts") // comma split hosts
 )
@@ -93,6 +94,22 @@ func main() {
 
 	if tlsKey != "" && tlsCert != "" {
 		cert, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if s.TLSConfig == nil {
+			s.TLSConfig = &tls.Config{}
+		}
+		s.TLSConfig.Certificates = append(s.TLSConfig.Certificates, cert)
+	}
+
+	if len(tlsSelfSignedHosts) > 0 {
+		hosts := strings.Split(autocertHosts, ",")
+
+		cert, err := parapet.GenerateSelfSignCertificate(parapet.SelfSign{
+			CommonName: "tirev",
+			Hosts:      hosts,
+		})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -267,7 +284,7 @@ func main() {
 
 	if s.TLSConfig != nil {
 		s.TLSConfig.MinVersion = parseTLSVersion(tlsMinVersion)
-		fmt.Println("TLS Min Version", tlsMinVersion)
+		fmt.Println("TLS Min Version:", tlsMinVersion)
 	}
 
 	s.Addr = fmt.Sprintf(":%d", port)
