@@ -1,8 +1,4 @@
 steps:
-- name: gcr.io/moonrhythm-containers/golang:1.17.0-alpine
-  args: [go, build, -o, tirev, -ldflags, -w -s, -tags=cbrotli, main.go]
-  env:
-  - CGO_ENABLED=1
 - name: gcr.io/cloud-builders/docker
   args: [build, -t, gcr.io/$PROJECT_ID/tirev:master, '.']
 - name: gcr.io/cloud-builders/docker

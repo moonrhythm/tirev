@@ -1,7 +1,21 @@
-FROM gcr.io/moonrhythm-containers/alpine
+FROM golang:1.17.6-alpine
 
-RUN mkdir -p /app
+RUN apk --no-cache add git build-base brotli-dev
+
+ENV CGO_ENABLED=1
+WORKDIR /workspace
+
+ADD go.mod go.sum ./
+RUN go mod download
+
+ADD . .
+RUN go build -o tirev -ldflags "-w -s" -tags=cbrotli main.go
+
+FROM alpine
+
+RUN apk add --no-cache ca-certificates tzdata brotli
+
 WORKDIR /app
 
-COPY tirev ./
+COPY --from=0 /workspace/tirev ./
 ENTRYPOINT ["/app/tirev"]
