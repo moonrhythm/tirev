@@ -1,4 +1,4 @@
-FROM golang:1.18.3-alpine
+FROM golang:1.18.4-alpine
 
 RUN apk --no-cache add git build-base brotli-dev
 
