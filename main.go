@@ -9,6 +9,7 @@ import (
 
 	"github.com/acoshift/configfile"
 	"github.com/moonrhythm/parapet"
+	"github.com/moonrhythm/parapet/pkg/authn"
 	"github.com/moonrhythm/parapet/pkg/body"
 	"github.com/moonrhythm/parapet/pkg/compress"
 	"github.com/moonrhythm/parapet/pkg/gcp"
@@ -66,6 +67,8 @@ var (
 	tlsSelfSignedHosts   = config.String("tls_self_signed_hosts")
 	autocertDir          = config.String("autocert_dir")
 	autocertHosts        = config.String("autocert_hosts") // comma split hosts
+	authBasicUsername    = config.String("auth_basic_username")
+	authBasicPassword    = config.String("auth_basic_password")
 )
 
 func main() {
@@ -223,6 +226,11 @@ func main() {
 	} else if redirectWWW == "non" {
 		s.Use(redirect.NonWWW())
 		fmt.Println("Registered Non-WWW Redirector")
+	}
+
+	if authBasicUsername != "" && authBasicPassword != "" {
+		s.Use(authn.Basic(authBasicUsername, authBasicPassword))
+		fmt.Println("Registered Basic Auth")
 	}
 
 	if len(upstreamHeaderSet) > 0 {
