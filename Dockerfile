@@ -1,5 +1,7 @@
 FROM golang:1.20.4-bullseye
 
+ARG VERSION
+
 RUN apt-get update && \
 	apt-get -y install libbrotli-dev
 
@@ -12,7 +14,7 @@ RUN go mod download
 ADD . .
 RUN go build \
         -o tirev \
-        -ldflags "-w -s" \
+        -ldflags "-w -s -X main.version=$VERSION" \
         -tags=cbrotli \
         main.go
 

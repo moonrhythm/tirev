@@ -27,6 +27,8 @@ import (
 
 var config = configfile.NewEnvReader()
 
+var version = "HEAD"
+
 var (
 	front                = config.Bool("front")
 	port                 = config.IntDefault("port", 8080)
@@ -73,6 +75,7 @@ var (
 
 func main() {
 	fmt.Println("tirev")
+	fmt.Printf("version: %s\n", version)
 	fmt.Println()
 
 	var s *parapet.Server
