@@ -29,6 +29,4 @@ jobs:
         build-args: |
           VERSION=${{ github.sha }}
         push: true
-        tags:
-        - us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:${{ github.sha }}
-        - us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:master
+        tags: us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:${{ github.sha }},us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:master

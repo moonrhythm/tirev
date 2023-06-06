@@ -29,6 +29,4 @@ jobs:
         build-args: |
           VERSION=${{ github.ref_name }}
         push: true
-        tags:
-        - us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:${{ github.ref_name }}
-        - us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:latest
+        tags: us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:${{ github.ref_name }},us-docker.pkg.dev/moonrhythm-containers/gcr.io/tirev:latest
