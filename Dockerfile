@@ -1,19 +1,26 @@
-FROM golang:1.20.4-alpine
+FROM golang:1.20.4-bullseye
 
-RUN apk --no-cache add git build-base brotli-dev
+RUN apt-get update && \
+	apt-get -y install libbrotli-dev
 
 ENV CGO_ENABLED=1
-WORKDIR /workspace
 
+WORKDIR /workspace
 ADD go.mod go.sum ./
 RUN go mod download
 
 ADD . .
-RUN go build -o tirev -ldflags "-w -s" -tags=cbrotli main.go
+RUN go build \
+        -o tirev \
+        -ldflags "-w -s" \
+        -tags=cbrotli \
+        main.go
 
-FROM alpine
+FROM debian:bullseye-slim
 
-RUN apk add --no-cache ca-certificates tzdata brotli
+RUN apt-get update && \
+	apt-get -y install libbrotli1 ca-certificates && \
+	rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
