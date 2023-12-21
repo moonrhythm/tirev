@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/acoshift/configfile v1.9.0
 	github.com/moonrhythm/parapet v0.13.3
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 )
 
 require (
