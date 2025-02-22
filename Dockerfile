@@ -1,4 +1,4 @@
-FROM golang:1.23.2-bullseye
+FROM golang:1.24.0-bullseye
 
 ARG VERSION
 
