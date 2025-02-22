@@ -1,4 +1,4 @@
-FROM golang:1.24.0-bullseye
+FROM golang:1.24.0-bookworm
 
 ARG VERSION
 
@@ -18,7 +18,7 @@ RUN go build \
         -tags=cbrotli \
         main.go
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 RUN apt-get update && \
 	apt-get -y install libbrotli1 ca-certificates && \
