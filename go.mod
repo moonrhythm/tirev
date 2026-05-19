@@ -1,6 +1,6 @@
 module github.com/moonrhythm/tirev
 
-go 1.25.0
+go 1.26.3
 
 require (
 	github.com/acoshift/configfile v1.9.0
