@@ -188,7 +188,7 @@ func main() {
 		fmt.Println("Registered Ratelimiter (minute):", ratelimitM)
 	}
 	if ratelimitH > 0 {
-		s.Use(ratelimit.FixedWindowPerMinute(ratelimitH))
+		s.Use(ratelimit.FixedWindowPerHour(ratelimitH))
 		fmt.Println("Registered Ratelimiter (hour):", ratelimitH)
 	}
 
